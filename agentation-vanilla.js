@@ -36,14 +36,14 @@
       right: 20px;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       background: #1a1a1a;
       border: 1px solid #333;
-      border-radius: 8px;
-      padding: 4px;
+      border-radius: 10px;
+      padding: 6px;
       pointer-events: auto;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 13px;
+      font-size: 14px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.4);
       user-select: none;
     }
@@ -52,14 +52,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       background: transparent;
       color: #999;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       transition: background 0.15s, color 0.15s;
       pointer-events: auto;
       position: relative;
@@ -67,29 +67,29 @@
     .av-btn:hover { background: #2a2a2a; color: #fff; }
     .av-btn.active { background: #333; color: #60a5fa; }
 
-    .av-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .av-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
     .av-badge {
       position: absolute;
       top: 2px;
       right: 2px;
-      min-width: 14px;
-      height: 14px;
-      border-radius: 7px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
       background: #60a5fa;
       color: #000;
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 3px;
+      padding: 0 4px;
       line-height: 1;
     }
 
     .av-divider {
       width: 1px;
-      height: 20px;
+      height: 24px;
       background: #333;
       margin: 0 2px;
     }
@@ -110,13 +110,13 @@
       pointer-events: none;
       background: #1a1a1a;
       border: 1px solid #333;
-      border-radius: 6px;
-      padding: 10px 12px;
+      border-radius: 8px;
+      padding: 14px 16px;
       color: #e5e5e5;
       font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-      font-size: 11px;
-      line-height: 1.5;
-      max-width: 420px;
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 480px;
       white-space: pre-wrap;
       word-break: break-all;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -131,13 +131,13 @@
     /* Annotation markers */
     .av-marker {
       position: fixed;
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: #f59e0b;
       color: #000;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -155,33 +155,33 @@
       position: fixed;
       background: #1a1a1a;
       border: 1px solid #333;
-      border-radius: 8px;
-      padding: 12px;
+      border-radius: 10px;
+      padding: 16px;
       pointer-events: auto;
       z-index: 2147483646;
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      width: 300px;
+      width: 360px;
     }
     .av-popover-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
       color: #999;
     }
     .av-popover-header strong { color: #f59e0b; }
     .av-popover textarea {
       width: 100%;
-      height: 60px;
+      height: 80px;
       background: #111;
       border: 1px solid #333;
-      border-radius: 4px;
+      border-radius: 6px;
       color: #e5e5e5;
       font-family: inherit;
-      font-size: 13px;
-      padding: 8px;
+      font-size: 14px;
+      padding: 10px;
       resize: vertical;
       outline: none;
     }
@@ -189,14 +189,14 @@
     .av-popover-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 6px;
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 10px;
     }
     .av-popover-btn {
-      padding: 5px 12px;
+      padding: 7px 16px;
       border: none;
-      border-radius: 4px;
-      font-size: 12px;
+      border-radius: 6px;
+      font-size: 13px;
       cursor: pointer;
       font-family: inherit;
     }
@@ -207,15 +207,15 @@
     /* Copied toast */
     .av-toast {
       position: fixed;
-      bottom: 68px;
+      bottom: 76px;
       right: 20px;
       background: #065f46;
       color: #6ee7b7;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 10px 20px;
+      border-radius: 8px;
       pointer-events: none;
       opacity: 0;
       transform: translateY(8px);
@@ -414,10 +414,9 @@
       const el = document.querySelector(ann.fullSelector);
       if (el) {
         const rect = el.getBoundingClientRect();
-        marker.style.top = (rect.top - 8) + 'px';
+        marker.style.top = (rect.top - 14) + 'px';
         marker.style.left = (rect.right - 14) + 'px';
       } else {
-        // Fallback to stored position
         marker.style.top = ann.y + 'px';
         marker.style.left = ann.x + 'px';
       }
@@ -431,7 +430,8 @@
     updateBadge();
   }
 
-  function showAnnotationDetail(ann) {
+  function showAnnotationDetail(ann, opts) {
+    const isNew = opts && opts.isNew;
     closePopover();
     const el = document.querySelector(ann.fullSelector);
     const rect = el ? el.getBoundingClientRect() : { top: ann.y, left: ann.x, bottom: ann.y + 20, right: ann.x + 20 };
@@ -460,11 +460,17 @@
     annotatePopover.querySelector('[data-action="save"]').addEventListener('click', () => {
       ann.comment = textarea.value.trim();
       closePopover();
-      renderMarkers();
+      updateBadge();
     });
 
     annotatePopover.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+      if (isNew) {
+        const idx = annotations.indexOf(ann);
+        if (idx > -1) annotations.splice(idx, 1);
+        annotations.forEach((a, i) => a.index = i + 1);
+      }
       closePopover();
+      renderMarkers();
     });
 
     annotatePopover.querySelector('[data-action="delete"]').addEventListener('click', () => {
@@ -480,7 +486,7 @@
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         ann.comment = textarea.value.trim();
         closePopover();
-        renderMarkers();
+        updateBadge();
       }
       if (e.key === 'Escape') closePopover();
     });
@@ -593,6 +599,17 @@
     e.stopPropagation();
 
     const el = e.target;
+
+    // If element already annotated, show its detail instead of duplicating
+    const existing = annotations.find(a => {
+      const annotatedEl = document.querySelector(a.fullSelector);
+      return annotatedEl === el;
+    });
+    if (existing) {
+      showAnnotationDetail(existing);
+      return;
+    }
+
     const rect = el.getBoundingClientRect();
 
     const ann = {
@@ -604,12 +621,12 @@
       textContent: (el.textContent || '').trim().slice(0, 80),
       comment: '',
       x: rect.right - 14,
-      y: rect.top - 8,
+      y: rect.top - 14,
     };
 
     annotations.push(ann);
     renderMarkers();
-    showAnnotationDetail(ann);
+    showAnnotationDetail(ann, { isNew: true });
   }
 
   // ── Toolbar Actions ────────────────────────────────────────────────

@@ -4,7 +4,7 @@
   "description": "Vanilla JS visual annotation tool for AI coding agents",
   "main": "agentation-vanilla.js",
   "scripts": {
-    "demo": "npx serve demo -p 3333"
+    "demo": "npx serve . -p 3333"
   },
   "keywords": ["annotation", "ai", "coding-agent", "devtools", "vanilla-js"],
   "license": "MIT"
