@@ -18,6 +18,33 @@
   let hoveredEl = null;
   let annotatePopover = null;
   let pinnedInspect = null; // { el, selector, data }
+  let justSelectedText = false;
+
+  // ── Persistence ────────────────────────────────────────────────────
+  const STORAGE_KEY = 'av_annotations_' + window.location.pathname;
+
+  function saveAnnotations() {
+    try {
+      const data = annotations.map(a => ({
+        index: a.index, type: a.type, shortSelector: a.shortSelector,
+        fullSelector: a.fullSelector, classes: a.classes, computed: a.computed,
+        textContent: a.textContent, selectedText: a.selectedText,
+        comment: a.comment, intent: a.intent, x: a.x, y: a.y,
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (_) {}
+  }
+
+  function loadAnnotations() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!Array.isArray(data)) return;
+      for (const a of data) {
+        a._marks = [];
+        annotations.push(a);
+      }
+    } catch (_) {}
+  }
 
   // ── Shadow DOM Host ────────────────────────────────────────────────
   const host = document.createElement('div');
@@ -184,7 +211,10 @@
       z-index: 2147483645;
       transition: transform 0.15s;
     }
-    .av-marker:hover { transform: scale(1.2); }
+    .av-marker:hover { transform: scale(1.2); background: #ef4444; }
+    .av-marker:hover .av-marker-num { display: none; }
+    .av-marker:hover .av-marker-x { display: flex; }
+    .av-marker-x { display: none; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
 
     /* Annotation popover (for adding note) */
     .av-popover {
@@ -477,8 +507,8 @@
     for (const ann of annotations) {
       const marker = document.createElement('div');
       marker.className = 'av-marker';
-      marker.textContent = ann.index;
       marker.title = ann.comment || '(no note)';
+      marker.innerHTML = `<span class="av-marker-num">${ann.index}</span><span class="av-marker-x">&times;</span>`;
 
       // Position at the element's top-right
       const el = document.querySelector(ann.fullSelector);
@@ -492,7 +522,22 @@
       }
 
       marker.addEventListener('click', () => {
-        showAnnotationDetail(ann);
+        if (ann._marks) {
+          for (const m of ann._marks) {
+            if (m.parentNode) {
+              const parent = m.parentNode;
+              while (m.firstChild) parent.insertBefore(m.firstChild, m);
+              m.remove();
+              parent.normalize();
+            }
+          }
+        }
+        const idx = annotations.indexOf(ann);
+        if (idx > -1) annotations.splice(idx, 1);
+        annotations.forEach((a, i) => a.index = i + 1);
+        saveAnnotations();
+        closePopover();
+        renderMarkers();
       });
 
       markersContainer.appendChild(marker);
@@ -546,13 +591,18 @@
       ann.comment = textarea.value.trim();
       closePopover();
       updateBadge();
+      saveAnnotations();
     });
 
     function removeTextHighlight(a) {
-      if (a._mark && a._mark.parentNode) {
-        const parent = a._mark.parentNode;
-        while (a._mark.firstChild) parent.insertBefore(a._mark.firstChild, a._mark);
-        a._mark.remove();
+      if (!a._marks) return;
+      for (const m of a._marks) {
+        if (m.parentNode) {
+          const parent = m.parentNode;
+          while (m.firstChild) parent.insertBefore(m.firstChild, m);
+          m.remove();
+          parent.normalize();
+        }
       }
     }
 
@@ -562,6 +612,7 @@
         const idx = annotations.indexOf(ann);
         if (idx > -1) annotations.splice(idx, 1);
         annotations.forEach((a, i) => a.index = i + 1);
+        saveAnnotations();
       }
       closePopover();
       renderMarkers();
@@ -572,6 +623,7 @@
       const idx = annotations.indexOf(ann);
       if (idx > -1) annotations.splice(idx, 1);
       annotations.forEach((a, i) => a.index = i + 1);
+      saveAnnotations();
       closePopover();
       renderMarkers();
     });
@@ -581,6 +633,7 @@
         ann.comment = textarea.value.trim();
         closePopover();
         updateBadge();
+        saveAnnotations();
       }
       if (e.key === 'Escape') closePopover();
     });
@@ -750,9 +803,11 @@
   }
 
   function onClick(e) {
-    // Skip if user just finished a text selection
-    const sel = window.getSelection();
-    if (sel && !sel.isCollapsed && sel.toString().trim()) return;
+    // Skip if text selection just created an annotation
+    if (justSelectedText) {
+      justSelectedText = false;
+      return;
+    }
 
     if (mode === 'inspect') {
       if (isOwnElement(e.target)) return;
@@ -803,6 +858,7 @@
     };
 
     annotations.push(ann);
+    saveAnnotations();
     renderMarkers();
     showAnnotationDetail(ann, { isNew: true });
   }
@@ -829,13 +885,19 @@
       });
     } else if (action === 'clear') {
       for (const a of annotations) {
-        if (a._mark && a._mark.parentNode) {
-          const parent = a._mark.parentNode;
-          while (a._mark.firstChild) parent.insertBefore(a._mark.firstChild, a._mark);
-          a._mark.remove();
+        if (a._marks) {
+          for (const m of a._marks) {
+            if (m.parentNode) {
+              const parent = m.parentNode;
+              while (m.firstChild) parent.insertBefore(m.firstChild, m);
+              m.remove();
+              parent.normalize();
+            }
+          }
         }
       }
       annotations.length = 0;
+      saveAnnotations();
       closePopover();
       renderMarkers();
       setMode('off');
@@ -883,32 +945,53 @@
 
     e.preventDefault();
     e.stopPropagation();
+    justSelectedText = true;
 
     const text = sel.toString().trim().slice(0, 200);
     const range = sel.getRangeAt(0);
-    const container = range.commonAncestorContainer;
-    const el = container.nodeType === 3 ? container.parentElement : container;
     const rect = range.getBoundingClientRect();
 
-    // Highlight the selected text
-    const mark = document.createElement('span');
-    mark.className = 'av-text-highlight';
-    try { range.surroundContents(mark); } catch (_) { /* complex selections */ }
+    // Find the real parent element before any DOM manipulation
+    const startEl = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer;
+    // Walk up past any inline elements to get a meaningful parent
+    let el = startEl;
+    while (el && el.parentElement && ['SPAN', 'A', 'EM', 'STRONG', 'B', 'I'].includes(el.tagName)) {
+      el = el.parentElement;
+    }
+
+    // Capture selector info before modifying DOM
+    const shortSel = getShortSelector(el);
+    const fullSel = getSelector(el);
+    const classes = (el.className && typeof el.className === 'string') ? el.className.trim() : '';
+    const computed = getComputedInfo(el);
+
+    // Highlight using CSS highlight-style marks for each text node in range
+    const marks = [];
+    try {
+      // Clone range contents, wrap in highlight spans
+      const fragment = range.cloneContents();
+      const mark = document.createElement('span');
+      mark.className = 'av-text-highlight';
+      range.deleteContents();
+      mark.appendChild(fragment);
+      range.insertNode(mark);
+      marks.push(mark);
+    } catch (_) { /* complex selections — skip highlighting */ }
 
     const ann = {
       index: annotations.length + 1,
       type: 'text',
-      shortSelector: getShortSelector(el),
-      fullSelector: getSelector(el),
-      classes: (el.className && typeof el.className === 'string') ? el.className.trim().replace('av-text-highlight', '').trim() : '',
-      computed: getComputedInfo(el),
+      shortSelector: shortSel,
+      fullSelector: fullSel,
+      classes: classes,
+      computed: computed,
       textContent: text,
       selectedText: text,
       comment: '',
       intent: '',
       x: rect.right - 14,
       y: rect.top - 14,
-      _mark: mark,
+      _marks: marks,
     };
 
     sel.removeAllRanges();
@@ -934,6 +1017,10 @@
   }
   window.addEventListener('scroll', onLayoutChange, { passive: true });
   window.addEventListener('resize', onLayoutChange, { passive: true });
+
+  // ── Init: Load Persisted Annotations ────────────────────────────────
+  loadAnnotations();
+  if (annotations.length) renderMarkers();
 
   console.log('%c[agentation-vanilla]%c loaded — press I to inspect, A to annotate', 'color:#60a5fa;font-weight:bold', 'color:inherit');
 })();

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — agentation-vanilla demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+
+    .header {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .header nav { display: flex; gap: 16px; }
+    .header nav a { color: #999; text-decoration: none; font-size: 14px; }
+    .header nav a:hover { color: #fff; }
+
+    .pricing-hero {
+      padding: 64px 32px;
+      text-align: center;
+    }
+    .pricing-hero h2 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .pricing-hero p { color: #666; font-size: 16px; }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      padding: 0 32px 64px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .plan {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .plan.featured {
+      border-color: #1a1a1a;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .plan h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .plan .price { font-size: 36px; font-weight: 700; margin: 16px 0; }
+    .plan .price span { font-size: 14px; font-weight: 400; color: #666; }
+    .plan ul { list-style: none; margin: 16px 0 24px; }
+    .plan ul li { padding: 6px 0; font-size: 14px; color: #666; }
+    .plan .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .plan .btn:hover { background: #333; }
+
+    .footer {
+      background: #1a1a1a;
+      color: #666;
+      padding: 24px 32px;
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1>Demo App</h1>
+    <nav>
+      <a href="/demo/">Home</a>
+      <a href="/demo/pricing.html">Pricing</a>
+    </nav>
+  </header>
+
+  <section class="pricing-hero">
+    <h2>Simple pricing</h2>
+    <p>No hidden fees. Cancel anytime.</p>
+  </section>
+
+  <section class="plans">
+    <div class="plan">
+      <h3>Starter</h3>
+      <div class="price">$0<span>/mo</span></div>
+      <ul>
+        <li>1 project</li>
+        <li>Basic annotations</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="btn">Get Started</a>
+    </div>
+    <div class="plan featured">
+      <h3>Pro</h3>
+      <div class="price">$12<span>/mo</span></div>
+      <ul>
+        <li>Unlimited projects</li>
+        <li>Text selection</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#" class="btn">Start Free Trial</a>
+    </div>
+    <div class="plan">
+      <h3>Team</h3>
+      <div class="price">$29<span>/mo</span></div>
+      <ul>
+        <li>Everything in Pro</li>
+        <li>Shared annotations</li>
+        <li>Slack integration</li>
+      </ul>
+      <a href="#" class="btn">Contact Sales</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    &copy; 2026 Demo App. Built for testing agentation-vanilla.
+  </footer>
+
+  <script src="/agentation-vanilla.js"></script>
+</body>
+</html>
