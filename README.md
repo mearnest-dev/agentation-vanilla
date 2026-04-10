@@ -77,6 +77,7 @@ Copy all annotations as structured markdown your AI agent can act on:
 | `Esc` | Deactivate / close |
 
 ## Demo
+Clone the repo
 
 ```bash
 git clone https://github.com/mearnest-dev/agentation-vanilla.git
