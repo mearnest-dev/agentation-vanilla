@@ -59,6 +59,7 @@ Clicking the copy button (or pressing `C`) copies structured markdown:
 ```
 
 ## Demo
+Clone the repo
 
 ```bash
 npm run demo
