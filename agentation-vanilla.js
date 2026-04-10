@@ -47,8 +47,9 @@
       for (const a of data) {
         // Drop expired annotations
         if (a.savedAt && (now - a.savedAt) > maxAge) continue;
-        // Drop annotations whose element no longer exists on the page
-        if (a.fullSelector && !document.querySelector(a.fullSelector)) continue;
+        // Drop annotations with empty or dead selectors
+        if (!a.fullSelector) continue;
+        try { if (!document.querySelector(a.fullSelector)) continue; } catch (_) { continue; }
         a._marks = [];
         annotations.push(a);
       }
@@ -527,7 +528,7 @@
       marker.innerHTML = `<span class="av-marker-num">${ann.index}</span><span class="av-marker-x">&times;</span>`;
 
       // Position at the element's top-right
-      const el = document.querySelector(ann.fullSelector);
+      const el = ann.fullSelector ? document.querySelector(ann.fullSelector) : null;
       if (el) {
         const rect = el.getBoundingClientRect();
         marker.style.top = (rect.top - 14) + 'px';
@@ -564,7 +565,7 @@
   function showAnnotationDetail(ann, opts) {
     const isNew = opts && opts.isNew;
     closePopover();
-    const el = document.querySelector(ann.fullSelector);
+    const el = ann.fullSelector ? document.querySelector(ann.fullSelector) : null;
     const rect = el ? el.getBoundingClientRect() : { top: ann.y, left: ann.x, bottom: ann.y + 20, right: ann.x + 20 };
 
     annotatePopover = document.createElement('div');
@@ -872,6 +873,7 @@
 
     // If element already annotated, show its detail instead of duplicating
     const existing = annotations.find(a => {
+      if (!a.fullSelector) return false;
       const annotatedEl = document.querySelector(a.fullSelector);
       return annotatedEl === el;
     });
