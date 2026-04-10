@@ -1,2 +1,6 @@
 <!DOCTYPE html>
-<meta http-equiv="refresh" content="0;url=/agentation-vanilla/demo/">
+<script>
+  // GitHub Pages serves from /agentation-vanilla/, local dev serves from /
+  var base = location.hostname.includes('github.io') ? '/agentation-vanilla' : '';
+  location.replace(base + '/demo/');
+</script>

@@ -439,6 +439,10 @@
     return false;
   }
 
+  function isTopLevel(el) {
+    return el === document.body || el === document.documentElement;
+  }
+
   function positionTooltip(rect) {
     const pad = 12;
     let top = rect.bottom + pad;
@@ -690,6 +694,7 @@
     if (mode === 'off') return;
     if (pinnedInspect) return;
     if (isOwnElement(e.target)) return;
+    if (isTopLevel(e.target)) return;
 
     const el = e.target;
     if (el === hoveredEl) return;
@@ -811,6 +816,7 @@
 
     if (mode === 'inspect') {
       if (isOwnElement(e.target)) return;
+      if (isTopLevel(e.target)) return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -825,6 +831,7 @@
 
     if (mode !== 'annotate') return;
     if (isOwnElement(e.target)) return;
+    if (isTopLevel(e.target)) return;
 
     e.preventDefault();
     e.stopPropagation();
