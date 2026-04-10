@@ -40,9 +40,14 @@
       const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (!Array.isArray(data)) return;
       for (const a of data) {
+        // Drop annotations whose element no longer exists on the page
+        if (a.fullSelector && !document.querySelector(a.fullSelector)) continue;
         a._marks = [];
         annotations.push(a);
       }
+      // Re-index in case some were dropped
+      annotations.forEach((a, i) => a.index = i + 1);
+      if (data.length !== annotations.length) saveAnnotations();
     } catch (_) {}
   }
 
@@ -557,8 +562,19 @@
 
     annotatePopover = document.createElement('div');
     annotatePopover.className = 'av-popover';
-    annotatePopover.style.top = (rect.bottom + 8) + 'px';
-    annotatePopover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+
+    // Position popover within viewport
+    const popW = 360;
+    let popTop = rect.bottom + 8;
+    let popLeft = rect.left;
+
+    // Clamp horizontal
+    popLeft = Math.max(10, Math.min(popLeft, window.innerWidth - popW - 10));
+    // Clamp vertical — keep top on screen, let it scroll if needed
+    popTop = Math.max(10, popTop);
+
+    annotatePopover.style.top = popTop + 'px';
+    annotatePopover.style.left = popLeft + 'px';
 
     const intents = ['bug', 'style', 'feature', 'content'];
     annotatePopover.innerHTML = `
