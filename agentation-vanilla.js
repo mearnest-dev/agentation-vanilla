@@ -21,7 +21,9 @@
   let justSelectedText = false;
 
   // ── Persistence ────────────────────────────────────────────────────
-  const STORAGE_KEY = 'av_annotations_' + window.location.pathname;
+  // Normalize pathname: strip trailing slash and index.html for consistent keys
+  const normalPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
+  const STORAGE_KEY = 'av_annotations_' + normalPath;
 
   function saveAnnotations() {
     try {
@@ -30,6 +32,7 @@
         fullSelector: a.fullSelector, classes: a.classes, computed: a.computed,
         textContent: a.textContent, selectedText: a.selectedText,
         comment: a.comment, intent: a.intent, x: a.x, y: a.y,
+        savedAt: Date.now(),
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (_) {}
@@ -39,7 +42,11 @@
     try {
       const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (!Array.isArray(data)) return;
+      const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+      const now = Date.now();
       for (const a of data) {
+        // Drop expired annotations
+        if (a.savedAt && (now - a.savedAt) > maxAge) continue;
         // Drop annotations whose element no longer exists on the page
         if (a.fullSelector && !document.querySelector(a.fullSelector)) continue;
         a._marks = [];
@@ -565,13 +572,22 @@
 
     // Position popover within viewport
     const popW = 360;
+    const popH = 280;
     let popTop = rect.bottom + 8;
     let popLeft = rect.left;
 
+    // Flip above if it would go below the viewport
+    if (popTop + popH > window.innerHeight - 10) {
+      popTop = rect.top - popH - 8;
+    }
+    // If still off-screen (element is tall), just pin to bottom
+    if (popTop + popH > window.innerHeight - 10) {
+      popTop = window.innerHeight - popH - 10;
+    }
+    // Never go above the top
+    if (popTop < 10) popTop = 10;
     // Clamp horizontal
     popLeft = Math.max(10, Math.min(popLeft, window.innerWidth - popW - 10));
-    // Clamp vertical — keep top on screen, let it scroll if needed
-    popTop = Math.max(10, popTop);
 
     annotatePopover.style.top = popTop + 'px';
     annotatePopover.style.left = popLeft + 'px';
