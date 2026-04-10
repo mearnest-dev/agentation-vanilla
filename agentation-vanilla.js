@@ -453,7 +453,10 @@
   }
 
   function isTopLevel(el) {
-    return el === document.body || el === document.documentElement;
+    if (el === document.body || el === document.documentElement) return true;
+    // Skip elements that cover most of the viewport (full-page wrappers)
+    const rect = el.getBoundingClientRect();
+    return rect.width >= window.innerWidth * 0.9 && rect.height >= window.innerHeight * 0.9;
   }
 
   function positionTooltip(rect) {
