@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>agentation-vanilla demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+
+    .header {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .header nav { display: flex; gap: 16px; }
+    .header nav a { color: #999; text-decoration: none; font-size: 14px; }
+    .header nav a:hover { color: #fff; }
+
+    .hero {
+      padding: 80px 32px;
+      text-align: center;
+      background: linear-gradient(135deg, #f0f4ff, #fafafa);
+    }
+    .hero h2 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+    .hero p { color: #666; font-size: 16px; max-width: 480px; margin: 0 auto 24px; }
+    .hero .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .hero .btn:hover { background: #333; }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      padding: 64px 32px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      padding: 24px;
+    }
+    .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .card p { color: #666; font-size: 14px; }
+
+    .form-section {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 64px 32px;
+    }
+    .form-section h3 { font-size: 20px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #333; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1a1a1a; }
+    .submit-btn {
+      padding: 10px 24px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .footer {
+      background: #1a1a1a;
+      color: #666;
+      padding: 24px 32px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .badge { display: inline-block; padding: 2px 8px; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 500; border-radius: 99px; }
+    .alert { padding: 12px 16px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 14px; margin: 24px 32px; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1>Demo App</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <div class="alert">
+    This is an alert message. Something needs your attention.
+  </div>
+
+  <section class="hero">
+    <span class="badge">New</span>
+    <h2>Build something great</h2>
+    <p>This is a demo page with various UI elements for testing the agentation-vanilla annotation tool.</p>
+    <a href="#" class="btn">Get Started</a>
+  </section>
+
+  <section class="features">
+    <div class="card">
+      <h3>Fast</h3>
+      <p>Zero dependencies, loads instantly. No framework overhead.</p>
+    </div>
+    <div class="card">
+      <h3>Simple</h3>
+      <p>One script tag. Click to annotate. Copy to share with your AI agent.</p>
+    </div>
+    <div class="card">
+      <h3>Precise</h3>
+      <p>CSS selectors, computed styles, and element paths — not vague descriptions.</p>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <h3>Contact Form</h3>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" placeholder="Your name">
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+      <label for="topic">Topic</label>
+      <select id="topic">
+        <option>General</option>
+        <option>Bug Report</option>
+        <option>Feature Request</option>
+      </select>
+    </div>
+    <button class="submit-btn">Send Message</button>
+  </section>
+
+  <footer class="footer">
+    &copy; 2026 Demo App. Built for testing agentation-vanilla.
+  </footer>
+
+  <!-- Load agentation-vanilla -->
+  <script src="../agentation-vanilla.js"></script>
+</body>
+</html>
