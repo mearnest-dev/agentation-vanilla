@@ -259,6 +259,33 @@
       z-index: 2147483646;
     }
     .av-toast.visible { opacity: 1; transform: translateY(0); }
+
+    /* Text selection highlight */
+    .av-text-highlight {
+      background: rgba(245, 158, 11, 0.25);
+      outline: 2px solid rgba(245, 158, 11, 0.5);
+      border-radius: 2px;
+    }
+
+    /* Intent tags */
+    .av-intent-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .av-intent-tag {
+      padding: 4px 10px;
+      border: 1px solid #333;
+      border-radius: 99px;
+      background: transparent;
+      color: #999;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .av-intent-tag:hover { border-color: #666; color: #fff; }
+    .av-intent-tag.selected { border-color: #60a5fa; background: rgba(96,165,250,0.15); color: #60a5fa; }
   `;
   shadow.appendChild(styles);
 
@@ -357,11 +384,12 @@
 
   function getComputedInfo(el) {
     const cs = window.getComputedStyle(el);
-    const props = ['display', 'padding', 'margin', 'color', 'background-color', 'font-size', 'font-family', 'border-radius', 'width', 'height'];
+    const props = ['display', 'padding', 'margin', 'color', 'background-color', 'font-size', 'border-radius', 'width', 'height'];
+    const skip = ['none', 'auto', 'normal', '0px', 'rgba(0, 0, 0, 0)', 'transparent', 'block', 'inline'];
     const result = {};
     for (const p of props) {
       const v = cs.getPropertyValue(p);
-      if (v && v !== 'none' && v !== 'auto' && v !== 'normal' && v !== '0px') {
+      if (v && !skip.includes(v)) {
         result[p] = v;
       }
     }
@@ -483,10 +511,15 @@
     annotatePopover.style.top = (rect.bottom + 8) + 'px';
     annotatePopover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
 
+    const intents = ['bug', 'style', 'feature', 'content'];
     annotatePopover.innerHTML = `
       <div class="av-popover-header">
         <strong>#${ann.index}</strong>
         <span>${esc(ann.shortSelector)}</span>
+      </div>
+      ${ann.selectedText ? `<div style="font-size:12px;color:#f59e0b;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${esc(ann.selectedText.slice(0, 60))}"</div>` : ''}
+      <div class="av-intent-row">
+        ${intents.map(i => `<button class="av-intent-tag${ann.intent === i ? ' selected' : ''}" data-intent="${i}">${i}</button>`).join('')}
       </div>
       <textarea placeholder="Add your note...">${ann.comment || ''}</textarea>
       <div class="av-popover-actions">
@@ -499,14 +532,33 @@
     const textarea = annotatePopover.querySelector('textarea');
     setTimeout(() => textarea.focus(), 50);
 
+    // Intent tag selection
+    annotatePopover.querySelectorAll('.av-intent-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        const intent = tag.dataset.intent;
+        ann.intent = ann.intent === intent ? '' : intent;
+        annotatePopover.querySelectorAll('.av-intent-tag').forEach(t => t.classList.remove('selected'));
+        if (ann.intent) tag.classList.add('selected');
+      });
+    });
+
     annotatePopover.querySelector('[data-action="save"]').addEventListener('click', () => {
       ann.comment = textarea.value.trim();
       closePopover();
       updateBadge();
     });
 
+    function removeTextHighlight(a) {
+      if (a._mark && a._mark.parentNode) {
+        const parent = a._mark.parentNode;
+        while (a._mark.firstChild) parent.insertBefore(a._mark.firstChild, a._mark);
+        a._mark.remove();
+      }
+    }
+
     annotatePopover.querySelector('[data-action="cancel"]').addEventListener('click', () => {
       if (isNew) {
+        removeTextHighlight(ann);
         const idx = annotations.indexOf(ann);
         if (idx > -1) annotations.splice(idx, 1);
         annotations.forEach((a, i) => a.index = i + 1);
@@ -516,9 +568,9 @@
     });
 
     annotatePopover.querySelector('[data-action="delete"]').addEventListener('click', () => {
+      removeTextHighlight(ann);
       const idx = annotations.indexOf(ann);
       if (idx > -1) annotations.splice(idx, 1);
-      // Re-index
       annotations.forEach((a, i) => a.index = i + 1);
       closePopover();
       renderMarkers();
@@ -545,25 +597,33 @@
 
   // ── Markdown Generator ─────────────────────────────────────────────
 
+  function cleanText(str) {
+    return str.replace(/\s+/g, ' ').trim();
+  }
+
   function generateMarkdown() {
     if (annotations.length === 0) return '(No annotations)';
 
     const lines = [`# UI Annotations`, ``, `**Page:** ${window.location.href}`, `**Date:** ${new Date().toISOString().slice(0, 10)}`, ``];
 
     for (const ann of annotations) {
-      lines.push(`## Annotation ${ann.index}`);
+      const label = ann.intent ? `[${ann.intent}] ` : '';
+      lines.push(`## ${label}Annotation ${ann.index}`);
       lines.push(`**Element:** \`${ann.shortSelector}\``);
-      lines.push(`**Selector:** \`${ann.fullSelector}\``);
-      if (ann.classes) lines.push(`**Classes:** \`${ann.classes}\``);
+      lines.push(`**Selector:** \`${ann.fullSelector || 'body'}\``);
 
-      // Computed styles
+      if (ann.selectedText) {
+        lines.push(`**Selected text:** "${cleanText(ann.selectedText)}"`);
+      } else if (ann.textContent) {
+        lines.push(`**Text:** "${cleanText(ann.textContent)}"`);
+      }
+
       const styleEntries = Object.entries(ann.computed);
       if (styleEntries.length) {
         const styleStr = styleEntries.map(([k, v]) => `${k}: ${v}`).join('; ');
-        lines.push(`**Computed:** \`${styleStr}\``);
+        lines.push(`**Styles:** \`${styleStr}\``);
       }
 
-      if (ann.textContent) lines.push(`**Text:** "${ann.textContent}"`);
       lines.push(`**Note:** ${ann.comment || '(no note)'}`);
       lines.push(``);
     }
@@ -690,6 +750,10 @@
   }
 
   function onClick(e) {
+    // Skip if user just finished a text selection
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed && sel.toString().trim()) return;
+
     if (mode === 'inspect') {
       if (isOwnElement(e.target)) return;
       e.preventDefault();
@@ -726,12 +790,14 @@
 
     const ann = {
       index: annotations.length + 1,
+      type: 'element',
       shortSelector: getShortSelector(el),
       fullSelector: getSelector(el),
       classes: (el.className && typeof el.className === 'string') ? el.className.trim() : '',
       computed: getComputedInfo(el),
       textContent: (el.textContent || '').trim().slice(0, 80),
       comment: '',
+      intent: '',
       x: rect.right - 14,
       y: rect.top - 14,
     };
@@ -762,6 +828,13 @@
         showToast('Copy failed — check permissions');
       });
     } else if (action === 'clear') {
+      for (const a of annotations) {
+        if (a._mark && a._mark.parentNode) {
+          const parent = a._mark.parentNode;
+          while (a._mark.firstChild) parent.insertBefore(a._mark.firstChild, a._mark);
+          a._mark.remove();
+        }
+      }
       annotations.length = 0;
       closePopover();
       renderMarkers();
@@ -799,10 +872,56 @@
     }
   });
 
+  // ── Text Selection Handler ──────────────────────────────────────────
+
+  function onMouseUp(e) {
+    if (mode !== 'annotate') return;
+    if (isOwnElement(e.target)) return;
+
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const text = sel.toString().trim().slice(0, 200);
+    const range = sel.getRangeAt(0);
+    const container = range.commonAncestorContainer;
+    const el = container.nodeType === 3 ? container.parentElement : container;
+    const rect = range.getBoundingClientRect();
+
+    // Highlight the selected text
+    const mark = document.createElement('span');
+    mark.className = 'av-text-highlight';
+    try { range.surroundContents(mark); } catch (_) { /* complex selections */ }
+
+    const ann = {
+      index: annotations.length + 1,
+      type: 'text',
+      shortSelector: getShortSelector(el),
+      fullSelector: getSelector(el),
+      classes: (el.className && typeof el.className === 'string') ? el.className.trim().replace('av-text-highlight', '').trim() : '',
+      computed: getComputedInfo(el),
+      textContent: text,
+      selectedText: text,
+      comment: '',
+      intent: '',
+      x: rect.right - 14,
+      y: rect.top - 14,
+      _mark: mark,
+    };
+
+    sel.removeAllRanges();
+    annotations.push(ann);
+    renderMarkers();
+    showAnnotationDetail(ann, { isNew: true });
+  }
+
   // ── Global Listeners ───────────────────────────────────────────────
   document.addEventListener('mousemove', onMouseMove, true);
   document.addEventListener('mouseout', onMouseOut, true);
   document.addEventListener('click', onClick, true);
+  document.addEventListener('mouseup', onMouseUp, true);
 
   // Reposition markers on scroll/resize
   let rafId = null;
