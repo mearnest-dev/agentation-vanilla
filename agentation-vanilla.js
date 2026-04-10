@@ -412,7 +412,7 @@
       parts.unshift(selector);
       current = current.parentElement;
     }
-    return parts.join(' > ');
+    return parts.join(' > ') || 'body';
   }
 
   function getShortSelector(el) {
