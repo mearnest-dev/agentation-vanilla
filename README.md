@@ -26,6 +26,15 @@ A toolbar appears in the bottom-right corner. That's it.
 </script>
 ```
 
+### Where to add it
+
+- **SPA (React, Vue, Svelte, etc.)** — one script tag in `index.html`, covers the whole app
+- **Multi-page with shared layout (Next.js, Django, Rails, PHP, 11ty)** — add it to your base template/layout
+- **Multi-page vanilla HTML** — drop the dev-only loader in whatever shared JS file all your pages import
+- **Express/Node** — inject it via middleware in dev mode
+
+The script auto-initializes and guards against double-loading, so it just works wherever you put it.
+
 ## Features
 
 - **Inspect mode** — hover to see selectors, styles, and dimensions. Click to pin and copy.
