@@ -1,23 +1,24 @@
 # agentation-vanilla
-<<<<<<< HEAD
 
 Vanilla JS visual annotation tool for AI coding agents. Zero dependencies. Single script tag. Shadow DOM isolated.
 
 Click elements on your page, add notes, and copy structured markdown that helps AI coding agents find the exact code you're referring to.
 
-## Usage
+## Quick Start
+
+Add one script tag to your app:
 
 ```html
-<script src="agentation-vanilla.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mearnest-dev/agentation-vanilla@main/agentation-vanilla.js"></script>
 ```
 
-Dev-only guard:
+Or dev-only:
 
 ```html
 <script>
   if (location.hostname === 'localhost') {
     const s = document.createElement('script');
-    s.src = '/path/to/agentation-vanilla.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/mearnest-dev/agentation-vanilla@main/agentation-vanilla.js';
     document.body.appendChild(s);
   }
 </script>
@@ -34,7 +35,7 @@ Dev-only guard:
 
 ## Modes
 
-**Inspect** — hover over any element to see its tag, classes, CSS selector path, computed styles, and dimensions.
+**Inspect** — hover over any element to see its tag, classes, CSS selector path, computed styles, and dimensions. Click to pin the tooltip and copy selector info.
 
 **Annotate** — click any element to pin a numbered marker and add a note. Click the marker again to edit or delete.
 
@@ -45,8 +46,8 @@ Clicking the copy button (or pressing `C`) copies structured markdown:
 ```markdown
 # UI Annotations
 
-**Page:** http://localhost:3333/
-**Date:** 2026-03-31
+**Page:** http://localhost:3333/demo
+**Date:** 2026-04-10
 
 ## Annotation 1
 **Element:** `button.btn-primary`
@@ -60,14 +61,11 @@ Clicking the copy button (or pressing `C`) copies structured markdown:
 ## Demo
 
 ```bash
-npx serve demo -p 3333
+npm run demo
 ```
 
-Then open http://localhost:3333.
+Then open http://localhost:3333/demo.
 
 ## License
 
 MIT
-=======
-A browser annotation tool for local development of vanilla JS applications
->>>>>>> d862ef763509c328220fcf94302c14f4afe01f6a
