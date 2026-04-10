@@ -17,6 +17,7 @@
   const annotations = [];
   let hoveredEl = null;
   let annotatePopover = null;
+  let pinnedInspect = null; // { el, selector, data }
 
   // ── Shadow DOM Host ────────────────────────────────────────────────
   const host = document.createElement('div');
@@ -127,6 +128,41 @@
     .av-tooltip-selector { color: #a78bfa; }
     .av-tooltip-label { color: #666; }
     .av-tooltip-value { color: #e5e5e5; }
+
+    .av-tooltip.pinned {
+      pointer-events: auto;
+      border-color: #60a5fa;
+    }
+    .av-tooltip-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #333;
+    }
+    .av-tooltip-copy {
+      padding: 5px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #60a5fa;
+      color: #000;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .av-tooltip-copy:hover { filter: brightness(1.15); }
+    .av-tooltip-dismiss {
+      padding: 5px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #999;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .av-tooltip-dismiss:hover { filter: brightness(1.15); }
 
     /* Annotation markers */
     .av-marker {
@@ -332,6 +368,10 @@
     return result;
   }
 
+  function esc(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function isOwnElement(el) {
     let current = el;
     while (current) {
@@ -395,7 +435,9 @@
 
     highlight.style.display = 'none';
     tooltip.style.display = 'none';
+    tooltip.classList.remove('pinned');
     hoveredEl = null;
+    pinnedInspect = null;
 
     document.body.style.cursor = mode === 'off' ? '' : 'crosshair';
   }
@@ -444,7 +486,7 @@
     annotatePopover.innerHTML = `
       <div class="av-popover-header">
         <strong>#${ann.index}</strong>
-        <span>${ann.shortSelector}</span>
+        <span>${esc(ann.shortSelector)}</span>
       </div>
       <textarea placeholder="Add your note...">${ann.comment || ''}</textarea>
       <div class="av-popover-actions">
@@ -533,6 +575,7 @@
 
   function onMouseMove(e) {
     if (mode === 'off') return;
+    if (pinnedInspect) return;
     if (isOwnElement(e.target)) return;
 
     const el = e.target;
@@ -558,18 +601,18 @@
       const computed = getComputedInfo(el);
       const text = (el.textContent || '').trim().slice(0, 60);
 
-      let html = `<span class="av-tooltip-tag">&lt;${tag}&gt;</span>`;
-      if (el.id) html += `  <span class="av-tooltip-class">#${el.id}</span>`;
-      if (classes.length) html += `  <span class="av-tooltip-class">.${classes.join('.')}</span>`;
-      html += `\n<span class="av-tooltip-label">selector:</span> <span class="av-tooltip-selector">${selector}</span>`;
+      let html = `<span class="av-tooltip-tag">&lt;${esc(tag)}&gt;</span>`;
+      if (el.id) html += `  <span class="av-tooltip-class">#${esc(el.id)}</span>`;
+      if (classes.length) html += `  <span class="av-tooltip-class">.${esc(classes.join('.'))}</span>`;
+      html += `\n<span class="av-tooltip-label">selector:</span> <span class="av-tooltip-selector">${esc(selector)}</span>`;
 
-      if (text) html += `\n<span class="av-tooltip-label">text:</span> <span class="av-tooltip-value">"${text}${el.textContent.trim().length > 60 ? '...' : ''}"</span>`;
+      if (text) html += `\n<span class="av-tooltip-label">text:</span> <span class="av-tooltip-value">"${esc(text)}${el.textContent.trim().length > 60 ? '...' : ''}"</span>`;
 
       const styleLines = Object.entries(computed);
       if (styleLines.length) {
         html += `\n<span class="av-tooltip-label">styles:</span>`;
         for (const [k, v] of styleLines) {
-          html += `\n  <span class="av-tooltip-label">${k}:</span> <span class="av-tooltip-value">${v}</span>`;
+          html += `\n  <span class="av-tooltip-label">${esc(k)}:</span> <span class="av-tooltip-value">${esc(v)}</span>`;
         }
       }
 
@@ -584,6 +627,7 @@
 
   function onMouseOut(e) {
     if (mode === 'off') return;
+    if (pinnedInspect) return;
     if (!e.relatedTarget || e.relatedTarget === document.documentElement) {
       highlight.style.display = 'none';
       tooltip.style.display = 'none';
@@ -591,7 +635,75 @@
     }
   }
 
+  function unpinInspect() {
+    pinnedInspect = null;
+    tooltip.classList.remove('pinned');
+    tooltip.style.display = 'none';
+    highlight.style.display = 'none';
+    hoveredEl = null;
+  }
+
+  function pinInspect(el) {
+    const selector = getSelector(el);
+    const computed = getComputedInfo(el);
+    const text = (el.textContent || '').trim().slice(0, 60);
+    const tag = el.tagName.toLowerCase();
+    const classes = (el.className && typeof el.className === 'string')
+      ? el.className.trim().split(/\s+/).filter(c => c)
+      : [];
+
+    pinnedInspect = { el, selector };
+
+    // Build copyable text
+    let copyText = `selector: ${selector}`;
+    if (classes.length) copyText += `\nclasses: ${classes.join(' ')}`;
+    if (text) copyText += `\ntext: "${text}"`;
+    const styleEntries = Object.entries(computed);
+    if (styleEntries.length) {
+      copyText += `\nstyles: ${styleEntries.map(([k, v]) => `${k}: ${v}`).join('; ')}`;
+    }
+
+    // Add copy/dismiss buttons to tooltip
+    const actions = document.createElement('div');
+    actions.className = 'av-tooltip-actions';
+    const copyBtnEl = document.createElement('button');
+    copyBtnEl.className = 'av-tooltip-copy';
+    copyBtnEl.textContent = 'Copy';
+    const dismissBtn = document.createElement('button');
+    dismissBtn.className = 'av-tooltip-dismiss';
+    dismissBtn.textContent = 'Dismiss';
+
+    copyBtnEl.addEventListener('click', () => {
+      navigator.clipboard.writeText(copyText).then(() => {
+        showToast('Selector copied');
+        unpinInspect();
+      });
+    });
+    dismissBtn.addEventListener('click', () => {
+      unpinInspect();
+    });
+
+    actions.appendChild(copyBtnEl);
+    actions.appendChild(dismissBtn);
+    tooltip.appendChild(actions);
+    tooltip.classList.add('pinned');
+  }
+
   function onClick(e) {
+    if (mode === 'inspect') {
+      if (isOwnElement(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (pinnedInspect) {
+        unpinInspect();
+        return;
+      }
+
+      pinInspect(e.target);
+      return;
+    }
+
     if (mode !== 'annotate') return;
     if (isOwnElement(e.target)) return;
 
