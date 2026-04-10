@@ -1,4 +1,5 @@
 # agentation-vanilla
+<<<<<<< HEAD
 
 Vanilla JS visual annotation tool for AI coding agents. Zero dependencies. Single script tag. Shadow DOM isolated.
 
@@ -67,3 +68,6 @@ Then open http://localhost:3333.
 ## License
 
 MIT
+=======
+A browser annotation tool for local development of vanilla JS applications
+>>>>>>> d862ef763509c328220fcf94302c14f4afe01f6a
